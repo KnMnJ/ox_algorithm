@@ -39,7 +39,13 @@
       min-height: 100%;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
-      overscroll-behavior-y: none
+      overscroll-behavior-y: none;
+      scrollbar-width: none
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none
     }
 
     body {
@@ -61,9 +67,7 @@
     .wrap {
       width: 100%;
       max-width: 460px;
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding: 22px 0 28px;
+      padding: 18px 0 20px;
       display: flex;
       flex-direction: column
     }
