@@ -207,6 +207,28 @@
       gap: 10px
     }
 
+    /* 홈 상단: 설정과 로그아웃 아이콘의 외곽/선 굵기를 완전히 통일 */
+    #home .top .row .icon {
+      box-sizing: border-box;
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      min-height: 42px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      flex: 0 0 42px;
+      line-height: 1;
+    }
+
+    #home .top .row .icon svg {
+      display: block;
+      width: 22px;
+      height: 22px;
+      flex: none;
+      overflow: visible;
+    }
+
     /* 로그인 */
     #auth {
       justify-content: center
@@ -1001,9 +1023,14 @@
       <div class="top">
         <div class="hello"><small>오늘도 한 문제씩</small><span id="who"></span></div>
         <div class="row">
-          <button class="icon" onclick="openAcct()" aria-label="계정 설정" title="아이디/비밀번호 변경">⚙</button>
+          <button class="icon" type="button" onclick="openAcct()" aria-label="계정 설정" title="아이디/비밀번호 변경">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m10 2-.4 2.1a8.2 8.2 0 0 0-1.8 1.1l-2-.8-2 3.4 1.6 1.4a8.3 8.3 0 0 0 0 2.1l-1.6 1.4 2 3.4 2-.8a8.2 8.2 0 0 0 1.8 1.1L10 20h4l.4-2.1a8.2 8.2 0 0 0 1.8-1.1l2 .8 2-3.4-1.6-1.4a8.3 8.3 0 0 0 0-2.1l1.6-1.4-2-3.4-2 .8a8.2 8.2 0 0 0-1.8-1.1L14 2z"/>
+              <circle cx="12" cy="11" r="3"/>
+            </svg>
+          </button>
           <button class="icon" type="button" onclick="logout()" aria-label="로그아웃" title="로그아웃">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
               <path d="M12 2v10"/>
             </svg>
