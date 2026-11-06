@@ -746,6 +746,7 @@
       <div class="top">
         <div class="hello"><small>오늘도 한 문제씩</small><span id="who"></span></div>
         <div class="row">
+          <button class="icon" onclick="openAcct()" aria-label="계정 설정" title="아이디/비밀번호 변경">⚙</button>
           <button class="icon" onclick="logout()" aria-label="로그아웃" title="로그아웃">⏻</button>
         </div>
       </div>
@@ -829,6 +830,18 @@
       <input id="subName" placeholder="과목 이름">
       <input id="subUrl" placeholder="CSV 링크: 파일 - 공유 - 웹에 게시(CSV)">
       <button class="btn pri" onclick="addSubject()">추가</button>
+    </div>
+  </div>
+
+  <!-- 계정 설정 -->
+  <div id="acctSheet" class="dim hide" onclick="if(event.target==this)closeAcct()">
+    <div class="sheet">
+      <h2>계정 설정</h2>
+      <input id="curPw" type="password" placeholder="현재 비밀번호 (필수)" autocomplete="current-password">
+      <input id="newId" placeholder="새 아이디 (바꾸지 않으면 비워두기)" autocomplete="off">
+      <input id="newPw" type="password" placeholder="새 비밀번호 (바꾸지 않으면 비워두기)" autocomplete="new-password">
+      <div class="note" id="acctMsg" role="status"></div>
+      <button class="btn pri" onclick="changeAccount()">변경하기</button>
     </div>
   </div>
 
@@ -1130,7 +1143,7 @@
     async function signup() {
       if (authBusy) return;
       const id = $("uid").value.trim(), pw = $("pw").value;
-      if (!id || pw.length < 8) { $("authMsg").textContent = "아이디를 입력하고 비밀번호는 8자 이상으로 설정하세요."; return; }
+      if (!id || !pw) { $("authMsg").textContent = "아이디와 비밀번호를 입력하세요."; return; }
       authBusy = true;
       $("authMsg").textContent = "가입 요청을 확인하는 중…";
       try {
@@ -1186,6 +1199,54 @@
       renderHome();
       if (LS(dirtyKey(id))) flushSync();
       else if (SYNC_URL) pull();
+    }
+    function openAcct() {
+      ["curPw", "newId", "newPw"].forEach(i => $(i).value = ""); $("acctMsg").textContent = "";
+      $("acctSheet").classList.remove("hide");
+    }
+    function closeAcct() { $("acctSheet").classList.add("hide"); }
+    async function changeAccount() {
+      if (authBusy || !user) return;
+      const msg = $("acctMsg"), cur = $("curPw").value, nid = $("newId").value.trim(), npw = $("newPw").value;
+      if (!cur) { msg.textContent = "현재 비밀번호를 입력하세요."; return; }
+      if (!nid && !npw) { msg.textContent = "바꿀 아이디 또는 비밀번호를 입력하세요."; return; }
+      const old = user, newId = nid || old;
+      if (newId === old && !npw) { msg.textContent = "현재와 같은 아이디예요."; return; }
+      authBusy = true; msg.textContent = "변경 중…";
+      try {
+        if (LS(dirtyKey(old))) await flushSync();
+        if (LS(dirtyKey(old))) { msg.textContent = "저장되지 않은 기록이 있어요. 인터넷 연결 후 다시 시도해 주세요."; return; }
+        const curH = await hash(cur);
+        if (curH !== LS("ox_ph")) { msg.textContent = "현재 비밀번호가 틀렸어요."; return; }
+        const newH = npw ? await hash(npw) : curH;
+        if (SYNC_URL) {
+          const r = await api({ action: "update", id: old, pw: curH, newId: newId !== old ? newId : "", newPw: npw ? newH : "" });
+          if (r.ok !== true) { msg.textContent = r.msg || "변경에 실패했어요."; return; }
+          if (r.changed !== true) { msg.textContent = "서버가 아직 구버전이에요. apps_script.gs를 새 버전으로 다시 배포해 주세요."; return; }
+        } else {
+          const users = LS("ox_users") || {};
+          if (newId !== old && users[newId]) { msg.textContent = "이미 있는 아이디예요."; return; }
+          delete users[old]; users[newId] = newH; LS("ox_users", users);
+        }
+        if (newId !== old) {
+          // 이 기기의 기록을 새 아이디로 이전.
+          for (const [from, to] of [[dataKey(old), dataKey(newId)], [dirtyKey(old), dirtyKey(newId)], [activeKey(old), activeKey(newId)], ["ox_subject_" + old, "ox_subject_" + newId]]) {
+            const v = LS(from); if (v !== null) { LS(to, v); removeLS(from); }
+          }
+          try {
+            Object.keys(localStorage).filter(k => k.startsWith("ox_cache_" + old + "_")).forEach(k => {
+              const v = LS(k); LS("ox_cache_" + newId + "_" + k.slice(("ox_cache_" + old + "_").length), v); removeLS(k);
+            });
+          } catch (_) {}
+          user = newId; LS("ox_session", newId);
+        }
+        LS("ox_ph", newH);
+        closeAcct(); renderHome();
+        alert(newId !== old && npw ? "아이디와 비밀번호를 변경했어요." : newId !== old ? "아이디를 변경했어요." : "비밀번호를 변경했어요.");
+      } catch (e) {
+        console.warn("OX account update error:", e);
+        msg.textContent = "변경 실패: " + authErrorText(e);
+      } finally { authBusy = false; }
     }
     async function logout() {
       if (LS(dirtyKey(user))) await flushSync();
