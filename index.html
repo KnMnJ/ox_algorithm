@@ -330,6 +330,70 @@
       color: transparent
     }
 
+    /* 선택한 과목의 학습 지표 */
+    .progress-metrics {
+      display: grid;
+      gap: 20px;
+      margin: 3px 0 24px;
+      padding: 20px 18px 17px;
+      border-radius: 20px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+    }
+
+    .metric-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .metric-head span {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .metric-head strong {
+      font-size: 17px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-track {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, .10);
+    }
+
+    .metric-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      transition: width .35s ease;
+    }
+
+    .metric-fill.coverage {
+      background: linear-gradient(90deg, #7c5cff, #a399ff);
+    }
+
+    .metric-fill.accuracy {
+      background: linear-gradient(90deg, #3b82f6, #5db6f7);
+    }
+
+    .metric-fill.mastery {
+      background: linear-gradient(90deg, #10b981, #40d8b5);
+    }
+
+    .metric-detail {
+      margin-top: 6px;
+      color: var(--sub);
+      text-align: left;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
     .grow {
       flex: 1
     }
@@ -841,6 +905,14 @@
               <li>풀이 기록은 계정에 저장돼요.</li>
             </ul>
           </section>
+          <section>
+            <h3>5. 과목별 학습 현황</h3>
+            <ul>
+              <li><b>진도율:</b> 한 번 이상 풀어본 문제의 비율이에요.</li>
+              <li><b>누적 정답률:</b> 1차 학습의 정답 비율이에요. 기존 기록은 모두 1차 학습으로 반영하고, 앞으로 재도전 기록은 제외해요.</li>
+              <li><b>숙지율:</b> 오답노트에 남아 있지 않고 3회 이상 연속 정답인 문제의 비율이에요.</li>
+            </ul>
+          </section>
         </div>
       </details>
     </div>
@@ -860,6 +932,23 @@
         <div class="stat w"><b id="nWrong">0</b><span>오답</span></div>
         <div class="stat uncertain"><b id="nUnsure">0</b><span>아리까리</span></div>
       </div>
+      <section class="progress-metrics" aria-label="선택 과목 학습 현황">
+        <div class="metric">
+          <div class="metric-head"><span>진도율</span><strong id="coverageRate">0%</strong></div>
+          <div class="metric-track" id="coverageBar" role="progressbar" aria-label="진도율" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="metric-fill coverage" id="coverageFill"></div></div>
+          <div class="metric-detail" id="coverageDetail">0 / 0문제</div>
+        </div>
+        <div class="metric">
+          <div class="metric-head"><span>누적 정답률</span><strong id="accuracyRate">0%</strong></div>
+          <div class="metric-track" id="accuracyBar" role="progressbar" aria-label="누적 정답률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="metric-fill accuracy" id="accuracyFill"></div></div>
+          <div class="metric-detail" id="accuracyDetail">0 / 0회</div>
+        </div>
+        <div class="metric">
+          <div class="metric-head"><span>숙지율</span><strong id="masteryRate">0%</strong></div>
+          <div class="metric-track" id="masteryBar" role="progressbar" aria-label="숙지율" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="metric-fill mastery" id="masteryFill"></div></div>
+          <div class="metric-detail" id="masteryDetail">0 / 0문제</div>
+        </div>
+      </section>
       <div class="grow"></div>
       <div class="stack">
         <button class="btn resume hide" onclick="resumeQuiz()" id="resumeBtn">이어서 풀기</button>
@@ -1012,6 +1101,34 @@
     }
     function dataFor(id) { return cleanData(LS(dataKey(id))); }
     function data() { return dataFor(user); }
+
+    const positiveCount = v => {
+      const n = Number(v);
+      return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
+    };
+
+    function mainCounts(st) {
+      // 이전 기록은 전부 1차 학습으로 간주한다. 변환 후부터는 재도전을 제외한다.
+      if (!st || typeof st !== "object") return { correct: 0, attempts: 0 };
+      const legacyCorrect = positiveCount(st.correct);
+      const legacyAttempts = legacyCorrect + positiveCount(st.incorrect);
+      const attempts = has(st, "mainAttempts") ? positiveCount(st.mainAttempts) : legacyAttempts;
+      const correct = has(st, "mainCorrect") ? positiveCount(st.mainCorrect) : legacyCorrect;
+      return { correct: Math.min(correct, attempts), attempts };
+    }
+
+    function migrateMainCounts() {
+      // 동일 계정으로 다시 접속해도 기존 답안을 재가산하지 않는 일회성 마이그레이션.
+      const d = data(); let changed = false;
+      for (const st of Object.values(d.stats)) {
+        if (!st || typeof st !== "object" || (has(st, "mainCorrect") && has(st, "mainAttempts"))) continue;
+        const counts = mainCounts(st);
+        st.mainCorrect = counts.correct;
+        st.mainAttempts = counts.attempts;
+        changed = true;
+      }
+      if (changed) save(d);
+    }
     function noteOf(raw) {
       if (raw === undefined || raw === null) return null;
       // 기존 오답 데이터 {qid: 0/1/...} 자동 호환.
@@ -1466,6 +1583,7 @@
       }
       if (owner === user && token === loadingToken) {
         migrateStableIds(questions, subjectName);
+        migrateMainCounts();
         renderHome();
       }
     }
@@ -1473,19 +1591,36 @@
       const w = data().wrong;
       return questions.filter(q => !!noteOf(w[qid(q)]));
     }
+    function setMetric(name, numerator, denominator, unit) {
+      const percentage = denominator ? Math.min(100, Math.max(0, numerator / denominator * 100)) : 0;
+      const rounded = Math.round(percentage * 10) / 10;
+      $(name + "Rate").textContent = `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)}%`;
+      $(name + "Fill").style.width = `${percentage}%`;
+      $(name + "Bar").setAttribute("aria-valuenow", String(rounded));
+      $(name + "Detail").textContent = `${numerator.toLocaleString("ko-KR")} / ${denominator.toLocaleString("ko-KR")}${unit}`;
+    }
     function renderHome() {
       if (!user) return;
       $("who").textContent = user + "님";
-      const w = data().wrong;
-      let incorrect = 0, uncertain = 0;
+      const d = data(), w = d.wrong;
+      let incorrect = 0, uncertain = 0, studied = 0, mastered = 0;
+      let mainCorrect = 0, mainAttempts = 0;
       questions.forEach(q => {
-        const note = noteOf(w[qid(q)]);
+        const id = qid(q), note = noteOf(w[id]), st = d.stats[id];
         if (note?.kind === "wrong") incorrect++;
         if (note?.kind === "unsure") uncertain++;
+        const counts = mainCounts(st);
+        mainCorrect += counts.correct;
+        mainAttempts += counts.attempts;
+        if (note || counts.attempts > 0 || (st && positiveCount(st.t) > 0)) studied++;
+        if (!note && cleanStreak(st) >= 3) mastered++;
       });
       $("nAll").textContent = questions.length;
       $("nWrong").textContent = incorrect;
       $("nUnsure").textContent = uncertain;
+      setMetric("coverage", studied, questions.length, "문제");
+      setMetric("accuracy", mainCorrect, mainAttempts, "회");
+      setMetric("mastery", mastered, questions.length, "문제");
       $("wrongBtn").textContent = `집중 복습 (${incorrect + uncertain})`;
       $("wrongBtn").disabled = incorrect + uncertain === 0;
       $("allBtn").disabled = questions.length === 0;
@@ -1661,6 +1796,10 @@
       // 오답노트 졸업 여부와 무관하게 동일한 연속 정답 횟수를 사용한다.
       // 졸업을 위한 정답은 계산하지 않고, 졸업 *다음* 정답부터 1회로 센다.
       const previousCleanStreak = cleanStreak(st);
+      // 정답률 분모·분자는 최초 풀이에서만 증가. 재도전도 오답노트와 숙지율에는 반영.
+      const beforeMain = mainCounts(st);
+      st.mainCorrect = beforeMain.correct + (session.phase === "main" && correct ? 1 : 0);
+      st.mainAttempts = beforeMain.attempts + (session.phase === "main" ? 1 : 0);
       delete st.postNoteStreak; // 이전 버전 필드 중복 집계를 제거한다.
       st.c = correct && !unsure && !oldNote ? previousCleanStreak + 1 : 0;
       st.t = Date.now();
