@@ -149,6 +149,47 @@
       box-shadow: 0 10px 30px #5b6cff55
     }
 
+    /* 홈의 세 가지 학습 모드: 크기·여백을 맞추고 색상만 구분 */
+    #home .study-action {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, .13);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -.25px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .14);
+    }
+
+    #home .study-all {
+      background: linear-gradient(115deg, #2563eb, #187bbb);
+      box-shadow: 0 7px 22px rgba(37, 99, 235, .22);
+    }
+
+    #home .study-new {
+      background: linear-gradient(115deg, #7250df, #7c4db5);
+      box-shadow: 0 7px 22px rgba(114, 80, 223, .24);
+    }
+
+    #home .study-review {
+      background: linear-gradient(115deg, #cf3155, #cb455e);
+      box-shadow: 0 7px 22px rgba(225, 59, 103, .22);
+    }
+
+    @media (hover: hover) {
+      #home .study-action:not(:disabled):hover {
+        filter: brightness(1.09);
+        transform: translateY(-2px);
+      }
+    }
+
+    #home .study-action:disabled {
+      box-shadow: none;
+      opacity: .38;
+    }
+
     .icon {
       width: 42px;
       height: 42px;
@@ -679,6 +720,43 @@
       font-weight: 700
     }
 
+    /* 과목 관리 - 작은 테두리 버튼과 가져오기 목록 */
+    .subject-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .sheet .subject-heading h2 { margin: 0; }
+    .borrow-trigger {
+      flex: none;
+      border: 1px solid rgba(255,255,255,.7);
+      background: rgba(255,255,255,.045);
+      color: #f4f5ff;
+      border-radius: 11px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -.1px;
+    }
+    .borrow-trigger:hover { background: rgba(255,255,255,.13); border-color: white; }
+    .borrow-description { margin: -4px 0 14px; color: var(--sub); font-size: 13px; line-height: 1.6; }
+    .borrow-options { display: grid; gap: 9px; max-height: 40vh; overflow: auto; margin-bottom: 14px; }
+    .borrow-option { display: flex; gap: 12px; align-items: center; padding: 14px 13px;
+      border: 1px solid var(--line); background: var(--glass); border-radius: 14px;
+      cursor: pointer; }
+    .borrow-option:has(input:checked) { border-color: #b4a2ff; background: rgba(124,92,255,.16); }
+    .borrow-option:has(input:disabled) { opacity: .52; cursor: default; }
+    .borrow-option input { width: 18px; height: 18px; margin: 0; padding: 0; accent-color: #927bff; flex: none; }
+    .borrow-name { display: block; font-size: 15px; font-weight: 650; overflow-wrap: anywhere; }
+    .borrow-meta { display: block; color: var(--sub); font-size: 12px; margin-top: 3px; }
+    .borrow-status { color: var(--sub); line-height: 1.55; font-size: 13px; min-height: 24px; margin-bottom: 12px; }
+    .borrow-status.error { color: #ffa5b5; }
+    .borrow-actions { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; }
+    .borrow-actions .btn { padding: 14px 10px; font-size: 14px; }
+
     /* v2: 아리까리 토글 / 복습 단계 / 결과 / 접근성 */
     .stats {
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -875,6 +953,7 @@
           <section>
             <h3>1. 문제 출제</h3>
             <ul>
+              <li>안 풀어본 문제 랜덤 학습에서는 풀이 기록이 없는 문제만 출제돼요.</li>
               <li>틀렸거나 아리까리한 문제는 더 자주 출제돼요.</li>
               <li>오답노트 이력과 관계없이 <b>3번 연속 정답</b>부터 망각 알고리즘이 적용돼 출제 확률이 크게 낮아져요.</li>
               <li>이후 연속 정답 횟수에 따라 <b>3일 → 7일 → 14일 → 30일</b> 간격으로 출제 확률이 서서히 다시 높아져요.</li>
@@ -923,7 +1002,12 @@
         <div class="hello"><small>오늘도 한 문제씩</small><span id="who"></span></div>
         <div class="row">
           <button class="icon" onclick="openAcct()" aria-label="계정 설정" title="아이디/비밀번호 변경">⚙</button>
-          <button class="icon" onclick="logout()" aria-label="로그아웃" title="로그아웃">⏻</button>
+          <button class="icon" type="button" onclick="logout()" aria-label="로그아웃" title="로그아웃">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+              <path d="M12 2v10"/>
+            </svg>
+          </button>
         </div>
       </div>
       <div class="chips" id="chips"></div>
@@ -952,8 +1036,9 @@
       <div class="grow"></div>
       <div class="stack">
         <button class="btn resume hide" onclick="resumeQuiz()" id="resumeBtn">이어서 풀기</button>
-        <button class="btn pri" onclick="pick('all')" id="allBtn">전체 랜덤 학습</button>
-        <button class="btn" onclick="pick('wrong')" id="wrongBtn">집중 복습</button>
+        <button class="btn study-action study-all" onclick="pick('all')" id="allBtn">전체 랜덤 학습</button>
+        <button class="btn study-action study-new" onclick="pick('new')" id="newBtn">안 풀어본 문제 랜덤 학습</button>
+        <button class="btn study-action study-review" onclick="pick('wrong')" id="wrongBtn">집중 복습</button>
       </div>
       <div class="note" id="loadMsg" role="status"></div>
       <div class="note sync" id="syncState" role="status" aria-live="polite"></div>
@@ -1018,11 +1103,31 @@
   <!-- 과목 관리 -->
   <div id="sheet" class="dim hide" onclick="if(event.target==this)closeSheet()">
     <div class="sheet">
-      <h2>과목</h2>
+      <div class="subject-heading">
+        <h2>과목</h2>
+        <button type="button" class="borrow-trigger" onclick="openBorrow()">뽀려오기</button>
+      </div>
       <div id="subList"></div>
       <input id="subName" placeholder="과목 이름">
       <input id="subUrl" placeholder="CSV 링크: 파일 - 공유 - 웹에 게시(CSV)">
       <button class="btn pri" onclick="addSubject()">추가</button>
+    </div>
+  </div>
+
+  <!-- 민주 계정의 과목 이름과 CSV 주소만 가져오기 (풀이 기록은 제외) -->
+  <div id="borrowSheet" class="dim hide" onclick="if(event.target===this)closeBorrow()">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="borrowTitle">
+      <div class="subject-heading">
+        <h2 id="borrowTitle">과목 뽀려오기</h2>
+        <button class="borrow-trigger" type="button" onclick="closeBorrow()" aria-label="닫기">닫기</button>
+      </div>
+      <p class="borrow-description">민주 계정에 등록된 과목을 골라 가져와요. 문제 CSV 주소만 복사되며, 민주 계정의 오답과 학습 기록은 가져오지 않아요.</p>
+      <div id="borrowStatus" class="borrow-status" role="status" aria-live="polite"></div>
+      <div id="borrowOptions" class="borrow-options"></div>
+      <div class="borrow-actions">
+        <button type="button" class="btn" onclick="closeBorrow()">취소</button>
+        <button type="button" class="btn pri" id="borrowSubmit" onclick="applyBorrow()" disabled>선택한 과목 가져오기</button>
+      </div>
     </div>
   </div>
 
@@ -1555,6 +1660,7 @@
       renderChips();
       $("loadMsg").textContent = sub.url ? "구글 시트에서 문제를 확인하는 중…" : "＋ 버튼으로 구글 시트를 추가하세요";
       $("allBtn").disabled = true;
+      $("newBtn").disabled = true;
       $("wrongBtn").disabled = true;
       if (!sub.url) {
         questions = [...SAMPLE];
@@ -1591,6 +1697,23 @@
       const w = data().wrong;
       return questions.filter(q => !!noteOf(w[qid(q)]));
     }
+
+    // 모든 과목별 학습 이력(기존 기록 포함)을 검사한다.
+    // 오답노트에 등록된 이력, 정답·오답 횟수, 마지막 풀이 기록 중 하나라도 있으면 풀이한 문제로 본다.
+    function isStudied(id, d) {
+      if (noteOf(d.wrong[id])) return true;
+      const st = d.stats[id];
+      if (!st || typeof st !== "object") return false;
+      const counts = mainCounts(st);
+      return counts.attempts > 0 || positiveCount(st.t) > 0
+        || positiveCount(st.correct) > 0 || positiveCount(st.incorrect) > 0
+        || positiveCount(st.uncertain) > 0;
+    }
+
+    function newList() {
+      const d = data();
+      return questions.filter(q => !isStudied(qid(q), d));
+    }
     function setMetric(name, numerator, denominator, unit) {
       const percentage = denominator ? Math.min(100, Math.max(0, numerator / denominator * 100)) : 0;
       const rounded = Math.round(percentage * 10) / 10;
@@ -1612,7 +1735,7 @@
         const counts = mainCounts(st);
         mainCorrect += counts.correct;
         mainAttempts += counts.attempts;
-        if (note || counts.attempts > 0 || (st && positiveCount(st.t) > 0)) studied++;
+        if (isStudied(id, d)) studied++;
         if (!note && cleanStreak(st) >= 3) mastered++;
       });
       $("nAll").textContent = questions.length;
@@ -1621,6 +1744,9 @@
       setMetric("coverage", studied, questions.length, "문제");
       setMetric("accuracy", mainCorrect, mainAttempts, "회");
       setMetric("mastery", mastered, questions.length, "문제");
+      const unseen = questions.length - studied;
+      $("newBtn").textContent = `안 풀어본 문제 랜덤 학습 (${unseen})`;
+      $("newBtn").disabled = unseen === 0;
       $("wrongBtn").textContent = `집중 복습 (${incorrect + uncertain})`;
       $("wrongBtn").disabled = incorrect + uncertain === 0;
       $("allBtn").disabled = questions.length === 0;
@@ -1633,7 +1759,107 @@
     function goHome() { show("home"); renderChips(); renderHome(); }
 
     function openSheet() { renderSubList(); $("sheet").classList.remove("hide"); }
-    function closeSheet() { $("sheet").classList.add("hide"); }
+    function closeSheet() { closeBorrow(); $("sheet").classList.add("hide"); }
+
+    const BORROW_FROM = "민주";
+    let borrowCatalog = [], borrowBusy = false, borrowRequest = 0;
+
+    function setBorrowStatus(message, error = false) {
+      $("borrowStatus").textContent = message;
+      $("borrowStatus").classList.toggle("error", !!error);
+    }
+    function cleanSharedSubjects(list) {
+      if (!Array.isArray(list)) return [];
+      const seen = new Set();
+      return list.filter(s => {
+        if (!s || typeof s.name !== "string" || typeof s.url !== "string") return false;
+        const name = s.name.trim(), url = s.url.trim();
+        if (!name || !/^https:\/\//i.test(url) || seen.has(name)) return false;
+        seen.add(name); return true;
+      }).map(s => ({ name: s.name.trim(), url: s.url.trim() }));
+    }
+    function renderBorrowOptions() {
+      const holder = $("borrowOptions"); holder.replaceChildren();
+      const existing = new Set(subjects().map(s => s.name));
+      for (const s of borrowCatalog) {
+        const already = existing.has(s.name);
+        const label = el("label", "borrow-option");
+        const input = document.createElement("input");
+        input.type = "checkbox"; input.value = s.name; input.disabled = already;
+        input.addEventListener("change", updateBorrowCount);
+        const detail = el("span");
+        detail.appendChild(el("span", "borrow-name", s.name));
+        detail.appendChild(el("span", "borrow-meta", already ? "이미 내 과목에 있어요" : "과목 추가 가능"));
+        label.append(input, detail); holder.appendChild(label);
+      }
+      updateBorrowCount();
+    }
+    function updateBorrowCount() {
+      const picked = $("borrowOptions").querySelectorAll('input[type="checkbox"]:checked').length;
+      $("borrowSubmit").disabled = borrowBusy || picked === 0;
+      $("borrowSubmit").textContent = picked ? `${picked}개 과목 가져오기` : "선택한 과목 가져오기";
+    }
+    async function openBorrow() {
+      if (!user) return;
+      const seq = ++borrowRequest;
+      borrowCatalog = []; borrowBusy = true;
+      $("borrowSheet").classList.remove("hide");
+      $("borrowOptions").replaceChildren();
+      setBorrowStatus("민주 계정의 과목을 불러오는 중…");
+      updateBorrowCount();
+      try {
+        if (!SYNC_URL) throw new Error("서버에 연결되어 있지 않아요.");
+        // 로그인한 요청자만 허용. 서버에서 공개 동의된 '민주'의 subjects만 반환해야 해요.
+        const r = await api({ action: "sharedSubjects", id: user, pw: LS("ox_ph"), sourceId: BORROW_FROM });
+        if (seq !== borrowRequest || !user) return;
+        if (r.ok !== true || !Array.isArray(r.subjects))
+          throw new Error(r.msg || "서버에 과목 공유 기능이 아직 없어요. Apps Script에 sharedSubjects를 추가해 주세요.");
+        borrowCatalog = cleanSharedSubjects(r.subjects);
+      } catch (e) {
+        if (seq !== borrowRequest || !user) return;
+        // 같은 브라우저에서 민주로 사용한 적이 있으면 로컬 기록도 복구 수단이 될 수 있어요.
+        const local = cleanSharedSubjects(dataFor(BORROW_FROM).subjects);
+        if (local.length) {
+          borrowCatalog = local;
+          setBorrowStatus("서버에서 불러올 수 없어 이 기기에 저장된 민주 계정의 과목을 보여줘요.");
+        } else {
+          setBorrowStatus(e.message || "과목을 불러오지 못했어요.", true);
+        }
+      } finally {
+        if (seq !== borrowRequest || !user) return;
+        borrowBusy = false;
+        renderBorrowOptions();
+        if (borrowCatalog.length) {
+          const available = borrowCatalog.filter(s => !subjects().some(own => own.name === s.name)).length;
+          if (!$("borrowStatus").textContent || $("borrowStatus").textContent.startsWith("민주 계정의 과목을 불러오는"))
+            setBorrowStatus(available ? `가져올 수 있는 과목 ${available}개 · 원하는 과목을 선택해 주세요.` : "모든 과목이 이미 추가되어 있어요.");
+        } else if (!$("borrowStatus").classList.contains("error")) {
+          setBorrowStatus("가져올 수 있는 과목이 없어요.");
+        }
+      }
+    }
+    function closeBorrow() {
+      borrowRequest++;
+      borrowBusy = false;
+      borrowCatalog = [];
+      $("borrowSheet").classList.add("hide");
+      $("borrowOptions").replaceChildren();
+    }
+    function applyBorrow() {
+      if (borrowBusy || !user) return;
+      const selected = new Set([...$("borrowOptions").querySelectorAll('input[type="checkbox"]:checked')].map(n => n.value));
+      if (!selected.size) return;
+      const d = data(), existing = new Set(d.subjects.map(s => s.name));
+      const imported = borrowCatalog.filter(s => selected.has(s.name) && !existing.has(s.name));
+      if (!imported.length) { setBorrowStatus("선택한 과목은 이미 추가되어 있어요.", true); return; }
+      // source 계정의 학습 기록은 복사하지 않고 계정별 독립적인 과목 목록만 수정한다.
+      d.subjects.push(...imported.map(s => ({ name: s.name, url: s.url })));
+      save(d);
+      curSubject = imported[0].name;
+      LS("ox_subject_" + user, curSubject);
+      closeSheet();
+      reload();
+    }
     function renderSubList() {
       const box = $("subList"); box.replaceChildren();
       subjects().forEach(s => {
@@ -1705,8 +1931,10 @@
     }
     function pick(mode) {
       curMode = mode;
-      $("countTitle").textContent = mode === "wrong" ? "집중 복습 · 문제 수 선택" : "전체 학습 · 문제 수 선택";
-      const total = mode === "wrong" ? wrongList().length : questions.length;
+      $("countTitle").textContent = mode === "wrong" ? "집중 복습 · 문제 수 선택"
+        : mode === "new" ? "안 풀어본 문제 · 문제 수 선택" : "전체 학습 · 문제 수 선택";
+      const total = mode === "wrong" ? wrongList().length : mode === "new" ? newList().length : questions.length;
+      if (!total) return;
       document.querySelectorAll("#countSheet [data-count]").forEach(b => {
         b.disabled = total === 0;
         b.querySelector("small").textContent = total < Number(b.dataset.count) ? `실제 ${total}문제` : "문제";
@@ -1719,7 +1947,8 @@
     }
     function start(n) {
       closeCount();
-      const pool = curMode === "wrong" ? shuffle([...wrongList()]) : weightedPick(questions, n);
+      const pool = curMode === "wrong" ? shuffle([...wrongList()])
+        : curMode === "new" ? shuffle([...newList()]) : weightedPick(questions, n);
       if (!pool.length) return;
       const active = LS(activeKey(user));
       if (active?.phase !== "done" && active?.version === 2 && !confirm("진행 중인 학습을 새 학습으로 바꿀까요?")) return;
