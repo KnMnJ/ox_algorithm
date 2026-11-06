@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e0f1f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>OX</title>
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    :root {
+      --bg: #0e0f1f;
+      --glass: rgba(255, 255, 255, .06);
+      --line: rgba(255, 255, 255, .10);
+      --tx: #f4f5ff;
+      --sub: #9a9cc0;
+      --acc: linear-gradient(135deg, #7c5cff, #4da3ff);
+      --o: linear-gradient(135deg, #3b82f6, #22d3ee);
+      --x: linear-gradient(135deg, #ff5d7a, #ff8f5d);
+      --good: #34d399;
+      --bad: #ff5d7a;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%
+    }
+
+    body {
+      font-family: Pretendard, system-ui, "Malgun Gothic", sans-serif;
+      color: var(--tx);
+      background:
+        radial-gradient(600px 400px at 10% -10%, #3a2c9a55, transparent),
+        radial-gradient(500px 400px at 100% 10%, #1d6fd855, transparent),
+        radial-gradient(500px 500px at 50% 110%, #c0357d33, transparent),
+        var(--bg);
+      background-attachment: fixed;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+      display: flex;
+      justify-content: center;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 460px;
+      min-height: 100vh;
+      padding: 22px 0 28px;
+      display: flex;
+      flex-direction: column
+    }
+
+    .hide {
+      display: none !important
+    }
+
+    .view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      animation: fade .35s ease
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      border: 0;
+      cursor: pointer;
+      transition: transform .12s, opacity .2s, filter .2s
+    }
+
+    button:active {
+      transform: scale(.96)
+    }
+
+    button:disabled {
+      opacity: .35;
+      cursor: default
+    }
+
+    input {
+      width: 100%;
+      font: inherit;
+      color: var(--tx);
+      padding: 15px 16px;
+      margin-bottom: 10px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      outline: none;
+      transition: border .2s
+    }
+
+    input::placeholder {
+      color: #6f7199
+    }
+
+    input:focus {
+      border-color: #7c5cff
+    }
+
+    .btn {
+      padding: 16px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 16px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      width: 100%
+    }
+
+    .btn.pri {
+      background: var(--acc);
+      border: 0;
+      box-shadow: 0 10px 30px #5b6cff55
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      font-size: 17px;
+      display: grid;
+      place-items: center;
+      flex: none
+    }
+
+    .row {
+      display: flex;
+      gap: 10px
+    }
+
+    /* 로그인 */
+    #auth {
+      justify-content: center
+    }
+
+    .logo {
+      font-size: 64px;
+      font-weight: 900;
+      letter-spacing: -3px;
+      margin-bottom: 28px;
+      background: var(--acc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
+
+    .logo span {
+      background: var(--x);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
+
+    .err {
+      color: var(--bad);
+      font-size: 14px;
+      min-height: 20px;
+      margin: 2px 4px 10px
+    }
+
+    /* 홈 */
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px
+    }
+
+    .hello {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      line-height: 1.3
+    }
+
+    .hello small {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--sub);
+      letter-spacing: 0
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 18px;
+      scrollbar-width: none
+    }
+
+    .chips::-webkit-scrollbar {
+      display: none
+    }
+
+    .chip {
+      flex: none;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--sub)
+    }
+
+    .chip.on {
+      background: var(--acc);
+      border: 0;
+      color: #fff;
+      box-shadow: 0 6px 20px #5b6cff55
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px
+    }
+
+    .stat {
+      padding: 20px;
+      border-radius: 22px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px)
+    }
+
+    .stat b {
+      display: block;
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1
+    }
+
+    .stat span {
+      font-size: 13px;
+      color: var(--sub)
+    }
+
+    .stat.w b {
+      background: var(--x);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
+
+    .grow {
+      flex: 1
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px
+    }
+
+    .note {
+      color: var(--sub);
+      font-size: 13px;
+      text-align: center;
+      min-height: 18px;
+      margin-top: 12px
+    }
+
+    /* 퀴즈 */
+    .qtop {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 26px
+    }
+
+    .bar {
+      flex: 1;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--glass);
+      overflow: hidden
+    }
+
+    .bar i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--acc);
+      border-radius: 99px;
+      transition: width .35s ease
+    }
+
+    .cnt {
+      font-size: 14px;
+      color: var(--sub);
+      font-variant-numeric: tabular-nums;
+      min-width: 48px;
+      text-align: right
+    }
+
+    .qcard {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 30px 24px;
+      border-radius: 28px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      margin-bottom: 18px;
+      min-height: 240px;
+      animation: pop .35s ease
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: scale(.96)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .tag {
+      align-self: flex-start;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 99px;
+      background: #7c5cff33;
+      color: #c4b5ff;
+      margin-bottom: 18px
+    }
+
+    .q {
+      font-size: 23px;
+      line-height: 1.55;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      word-break: keep-all
+    }
+
+    .ox {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .ox button {
+      height: 110px;
+      border-radius: 26px;
+      font-size: 54px;
+      font-weight: 900;
+      color: #fff;
+      box-shadow: 0 14px 34px #0006
+    }
+
+    .ox .o {
+      background: var(--o)
+    }
+
+    .ox .x {
+      background: var(--x)
+    }
+
+    .result {
+      padding: 18px 20px;
+      border-radius: 22px;
+      margin-bottom: 14px;
+      animation: pop .3s ease;
+      border: 1px solid var(--line)
+    }
+
+    .result.ok {
+      background: #34d39922;
+      border-color: #34d39966
+    }
+
+    .result.no {
+      background: #ff5d7a22;
+      border-color: #ff5d7a66;
+      animation: shake .4s
+    }
+
+    @keyframes shake {
+
+      20%,
+      60% {
+        transform: translateX(-6px)
+      }
+
+      40%,
+      80% {
+        transform: translateX(6px)
+      }
+    }
+
+    .result h3 {
+      margin: 0 0 6px;
+      font-size: 19px
+    }
+
+    .result p {
+      margin: 6px 0 0;
+      color: #d6d8f5;
+      line-height: 1.55;
+      font-size: 15px
+    }
+
+    .result .m {
+      color: var(--sub);
+      font-size: 13px
+    }
+
+    /* 바텀시트 */
+    .dim {
+      position: fixed;
+      inset: 0;
+      background: #000a;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 10;
+      animation: fadeonly .2s
+    }
+
+    @keyframes fadeonly {
+      from {
+        opacity: 0
+      }
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 460px;
+      max-height: 85vh;
+      overflow: auto;
+      background: #181a33;
+      border: 1px solid var(--line);
+      border-radius: 28px 28px 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      animation: up .3s ease
+    }
+
+    @keyframes up {
+      from {
+        transform: translateY(40px);
+        opacity: 0
+      }
+    }
+
+    .sheet h2 {
+      margin: 0 0 16px;
+      font-size: 20px
+    }
+
+    .counts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px
+    }
+
+    .counts button {
+      padding: 22px 0;
+      border-radius: 20px;
+      background: var(--glass);
+      border: 1px solid var(--line);
+      font-size: 14px;
+      color: var(--sub)
+    }
+
+    .counts button b {
+      display: block;
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--tx);
+      line-height: 1.2
+    }
+
+    .counts button:hover {
+      border-color: #7c5cff
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: var(--glass);
+      margin-bottom: 8px;
+      font-weight: 600
+    }
+
+    .grip { flex: 1; cursor: grab; user-select: none; padding: 4px 0 }
+    .dragging { opacity: .6; outline: 2px solid #fff; cursor: grabbing; user-select: none }
+
+    .item button {
+      background: #ff5d7a22;
+      color: var(--bad);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700
+    }
+
+    /* v2: 아리까리 토글 / 복습 단계 / 결과 / 접근성 */
+    .stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .stat {
+      padding: 17px 12px;
+      border-radius: 18px;
+    }
+
+    .stat b {
+      font-size: clamp(27px, 7vw, 37px);
+    }
+
+    .stat.uncertain b {
+      color: #fbbf70;
+    }
+
+    .stat span {
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .sync {
+      min-height: 16px;
+      margin-top: 5px;
+    }
+
+    .sync[data-state="error"] {
+      color: #ff9eae;
+    }
+
+    .sync[data-state="pending"] {
+      color: #e7c58b;
+    }
+
+    .sync[data-state="ok"] {
+      color: #81dfb8;
+    }
+
+    .resume {
+      border-color: #7c5cff99;
+      color: #c9bdff;
+    }
+
+    .phase {
+      font-size: 13px;
+      font-weight: 700;
+      color: #a4a7d1;
+      margin: -14px 0 12px;
+    }
+
+    .phase.review {
+      color: #fbbf70;
+    }
+
+    .uncertain-wrap {
+      display: flex;
+      justify-content: flex-end;
+      margin: -6px 0 16px;
+    }
+
+    .unsure-btn {
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, .06);
+      color: #b8bbd9;
+      border: 1px solid rgba(255, 255, 255, .17);
+      box-shadow: none;
+    }
+
+    .unsure-btn:hover {
+      border-color: #f7bc5e;
+      color: #ffdb97;
+    }
+
+    .unsure-btn.selected {
+      color: #211a0e;
+      background: linear-gradient(130deg, #ffd28b, #ffaf60);
+      border-color: transparent;
+      box-shadow: 0 4px 20px #ffbf6a33;
+    }
+
+    .unsure-btn.selected::before {
+      content: "✓ ";
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid #c1b3ff;
+      outline-offset: 3px;
+    }
+
+    .counts button small {
+      display: block;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .counts button:disabled {
+      opacity: .35;
+    }
+
+    .summary-desc {
+      line-height: 1.6;
+      color: var(--sub);
+      margin: 6px 2px 24px;
+    }
+
+    .summary-panel {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--glass);
+      padding: 10px 18px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      gap: 12px;
+    }
+
+    .summary-row+.summary-row {
+      border-top: 1px solid var(--line);
+    }
+
+    .summary-row span {
+      color: var(--sub);
+    }
+
+    .summary-row strong {
+      font-size: 20px;
+      white-space: nowrap;
+    }
+
+    @media (min-width: 820px) {
+      .wrap {
+        max-width: 620px;
+      }
+
+      .sheet {
+        max-width: 620px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .stat {
+        padding: 14px 8px;
+      }
+
+      .qcard {
+        padding: 24px 18px;
+      }
+
+      .q {
+        font-size: 21px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- 로그인 -->
+    <div id="auth" class="view hide">
+      <div class="logo">O<span>X</span></div>
+      <input id="uid" placeholder="아이디" autocomplete="username">
+      <input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password"
+        onkeydown="if(event.key=='Enter')login()">
+      <div class="err" id="authMsg"></div>
+      <div class="stack">
+        <button class="btn pri" onclick="login()">로그인</button>
+        <button class="btn" onclick="signup()">가입하기</button>
+      </div>
+    </div>
+
+    <!-- 홈 -->
+    <div id="home" class="view hide">
+      <div class="top">
+        <div class="hello"><small>오늘도 한 문제씩</small><span id="who"></span></div>
+        <div class="row">
+          <button class="icon" onclick="logout()" aria-label="로그아웃" title="로그아웃">⏻</button>
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="stats">
+        <div class="stat"><b id="nAll">0</b><span>문제</span></div>
+        <div class="stat w"><b id="nWrong">0</b><span>오답</span></div>
+        <div class="stat uncertain"><b id="nUnsure">0</b><span>아리까리</span></div>
+      </div>
+      <div class="grow"></div>
+      <div class="stack">
+        <button class="btn resume hide" onclick="resumeQuiz()" id="resumeBtn">이어서 풀기</button>
+        <button class="btn pri" onclick="pick('all')" id="allBtn">전체 랜덤 학습</button>
+        <button class="btn" onclick="pick('wrong')" id="wrongBtn">집중 복습</button>
+      </div>
+      <div class="note" id="loadMsg" role="status"></div>
+      <div class="note sync" id="syncState" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- 퀴즈 -->
+    <div id="quiz" class="view hide">
+      <div class="qtop">
+        <button class="icon" onclick="goHome()" aria-label="학습 중단하고 홈으로">✕</button>
+        <div class="bar"><i id="barFill"></i></div>
+        <div class="cnt" id="prog"></div>
+      </div>
+      <div class="phase" id="phaseLabel">1차 학습</div>
+      <div class="qcard">
+        <div class="tag" id="tag"></div>
+        <div class="q" id="qtext"></div>
+      </div>
+      <div class="uncertain-wrap">
+        <button type="button" class="unsure-btn" id="unsureBtn" aria-pressed="false" onclick="toggleUnsure()"
+          title="아리까리하게 느껴지면 눌러 표시하세요 (단축키 A)">☆ 아리까리</button>
+      </div>
+      <div id="ans" class="ox">
+        <button class="o" onclick="answer('O')">O</button>
+        <button class="x" onclick="answer('X')">X</button>
+      </div>
+      <div id="result" class="hide">
+        <div class="result" id="resBox"></div>
+        <button class="btn pri" onclick="next()" id="nextBtn">다음</button>
+      </div>
+    </div>
+
+    <!-- 최종 학습 결과 -->
+    <div id="summary" class="view hide">
+      <div class="top">
+        <div class="hello" id="summaryTitle">학습을 완료했어요!</div>
+      </div>
+      <p id="summaryDesc" class="summary-desc"></p>
+      <div class="summary-panel">
+        <div class="summary-row"><span>1차 정답</span><strong id="summaryMain">0 / 0</strong></div>
+        <div class="summary-row"><span>재도전 정답</span><strong id="summaryReview">0 / 0</strong></div>
+        <div class="summary-row"><span>이번 학습 중 졸업</span><strong><span id="summaryGraduated">0</span>문제</strong></div>
+      </div>
+      <p class="summary-desc" id="summaryRemaining"></p>
+      <div class="grow"></div>
+      <button class="btn pri" onclick="summaryHome()">홈으로 돌아가기</button>
+    </div>
+
+  </div>
+
+  <!-- 문제 수 선택 -->
+  <div id="countSheet" class="dim hide" onclick="if(event.target==this)closeCount()">
+    <div class="sheet">
+      <h2 id="countTitle"></h2>
+      <div class="counts">
+        <button onclick="start(10)" data-count="10"><b>10</b><small>문제</small></button>
+        <button onclick="start(20)" data-count="20"><b>20</b><small>문제</small></button>
+        <button onclick="start(30)" data-count="30"><b>30</b><small>문제</small></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 과목 관리 -->
+  <div id="sheet" class="dim hide" onclick="if(event.target==this)closeSheet()">
+    <div class="sheet">
+      <h2>과목</h2>
+      <div id="subList"></div>
+      <input id="subName" placeholder="과목 이름">
+      <input id="subUrl" placeholder="CSV 링크: 파일 - 공유 - 웹에 게시(CSV)">
+      <button class="btn pri" onclick="addSubject()">추가</button>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    /* =============================================
+      OX Quiz v2.1 — 로그인 진단 및 기존 구글 Apps Script API 호환
+      CSV A:단원 B:문제 C:정답 D:해설 E:고유ID(선택)
+      서버에 전송하는 키는 기존 wrong/subjects/stats 그대로 유지한다.
+      wrong은 이전 숫자 형식과 새 {kind, streak} 형식을 모두 읽는다.
+    ============================================= */
+    const SYNC_URL = "https://script.google.com/macros/s/AKfycby8sISzDs1zf3xWBqtgNfhApXcE8ujjoBBu1_CeGdjDwmovdWEcgwg_8PguYDaITAoz_A/exec";
+    const GOAL = Object.freeze({ wrong: 3, unsure: 2 });
+    const DAY = 86400000;
+    const GAP = { 3: 3, 4: 7, 5: 14 };
+    const SAMPLE = [
+      { u: "과학", q: "지구는 태양 주위를 돈다.", a: "O", e: "공전", id: "" },
+      { u: "과학", q: "물은 100℃에서 항상 끓는다.", a: "X", e: "기압에 따라 끓는점이 달라집니다.", id: "" },
+      { u: "생물", q: "거미는 곤충이다.", a: "X", e: "거미는 다리가 8개인 거미류입니다.", id: "" }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj || {}, key);
+    const el = (tag, cls, value) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (value !== undefined) n.textContent = value;
+      return n;
+    };
+    const views = ["auth", "home", "quiz", "summary"];
+    const show = id => views.forEach(s => $(s).classList.toggle("hide", s !== id));
+    const memoryFallback = new Map();
+    let storageFailed = false;
+    function LS(k, v) {
+      if (arguments.length === 1) {
+        try {
+          const raw = localStorage.getItem(k);
+          return raw === null ? (memoryFallback.get(k) ?? null) : JSON.parse(raw);
+        } catch (_) { return memoryFallback.get(k) ?? null; }
+      }
+      memoryFallback.set(k, v);
+      try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+      catch (_) { storageFailed = true; reportStorageFailure(); return false; }
+    }
+    function removeLS(k) {
+      memoryFallback.delete(k);
+      try { localStorage.removeItem(k); } catch (_) { storageFailed = true; reportStorageFailure(); }
+    }
+    function reportStorageFailure() {
+      if ($("syncState")) $("syncState").textContent = "기기 저장공간 오류 · 기록 보존을 보장할 수 없어요";
+    }
+    const dataKey = id => "ox_data_" + id;
+    const dirtyKey = id => "ox_dirty_" + id;
+    const activeKey = id => "ox_active_" + id;
+
+    function cleanData(raw) {
+      const d = raw && typeof raw === "object" ? raw : {};
+      return {
+        wrong: d.wrong && typeof d.wrong === "object" && !Array.isArray(d.wrong) ? d.wrong : {},
+        subjects: Array.isArray(d.subjects) ? d.subjects : [],
+        stats: d.stats && typeof d.stats === "object" && !Array.isArray(d.stats) ? d.stats : {}
+      };
+    }
+    function dataFor(id) { return cleanData(LS(dataKey(id))); }
+    function data() { return dataFor(user); }
+    function noteOf(raw) {
+      if (raw === undefined || raw === null) return null;
+      // 기존 오답 데이터 {qid: 0/1/...} 자동 호환.
+      if (typeof raw === "number" && Number.isFinite(raw))
+        return { kind: "wrong", streak: Math.max(0, Math.floor(raw)) };
+      if (typeof raw === "object" && ["wrong", "unsure"].includes(raw.kind))
+        return { kind: raw.kind, streak: Math.max(0, Math.floor(Number(raw.streak) || 0)) };
+      return null;
+    }
+    function updateNote(current, correct, unsure) {
+      // 재등록된 정답(아리까리)은 기존 누적치를 0/2로 초기화. 최초 정답은 미포함.
+      if (!correct) return { note: { kind: "wrong", streak: 0 }, graduated: false };
+      if (unsure) return { note: { kind: "unsure", streak: 0 }, graduated: false };
+      if (!current) return { note: null, graduated: false };
+      const now = current.streak + 1;
+      if (now >= GOAL[current.kind]) return { note: null, graduated: true };
+      return { note: { kind: current.kind, streak: now }, graduated: false };
+    }
+    function noteText(note) {
+      return note ? `${note.kind === "wrong" ? "오답" : "아리까리"} ${note.streak}/${GOAL[note.kind]}회` : "";
+    }
+
+    let usingLegacyHash = false;
+    async function hash(s) {
+      // 원본 HTML의 두 해시 경로를 모두 보존한다. 실행 환경이 Web Crypto를
+      // 허용하지 않으면 구버전과 동일한 DJB2 대체 해시를 사용한다.
+      // 동일 계정은 가입 당시와 같은 보안 환경(가급적 HTTPS)에서 로그인해야 한다.
+      usingLegacyHash = false;
+      try {
+        if (!globalThis.crypto || !globalThis.crypto.subtle) throw new Error("Web Crypto unavailable");
+        const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("oxquiz:" + s));
+        return Array.from(new Uint8Array(buf), x => x.toString(16).padStart(2, "0")).join("");
+      } catch (err) {
+        usingLegacyHash = true;
+        let h = 5381;
+        for (const c of s) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0;
+        return "f" + h;
+      }
+    }
+    function legacyQid(q, subjectName) {
+      // 기존 버전과 동일한 ID를 계산해 이전 학습기록과 연결.
+      let h = 0;
+      for (const c of subjectName + "|" + q.q.trim()) h = ((h << 5) - h + c.charCodeAt(0)) | 0;
+      return "q" + h;
+    }
+    function qid(q, sname) {
+      const subjectName = sname || subj().name;
+      // E열 고유ID가 있으면 지문 수정 후에도 학습기록이 유지됨.
+      return q.id
+        ? "id:" + encodeURIComponent(subjectName) + ":" + encodeURIComponent(String(q.id))
+        : legacyQid(q, subjectName);
+    }
+    function migrateStableIds(list, subjectName) {
+      // 기존 문제에 새 E열 고유ID를 추가한 경우, 과거 오답/통계 기록을 자동 이전.
+      const d = data(); let changed = false;
+      for (const q of list) {
+        if (!q.id) continue;
+        const before = legacyQid(q, subjectName), after = qid(q, subjectName);
+        for (const field of ["wrong", "stats"]) {
+          if (!has(d[field], before)) continue;
+          if (!has(d[field], after)) d[field][after] = d[field][before];
+          delete d[field][before]; changed = true;
+        }
+      }
+      if (changed) save(d);
+    }
+    function parseCSV(t) {
+      const rows = []; let row = [], cur = "", quoted = false;
+      const src = String(t).replace(/^\uFEFF/, "");
+      for (let i = 0; i < src.length; i++) {
+        const c = src[i];
+        if (quoted) {
+          if (c === '"' && src[i + 1] === '"') { cur += '"'; i++; }
+          else if (c === '"') quoted = false;
+          else cur += c;
+        } else if (c === '"') quoted = true;
+        else if (c === ',') { row.push(cur); cur = ""; }
+        else if (c === '\r' || c === '\n') {
+          if (c === '\r' && src[i + 1] === '\n') i++;
+          row.push(cur); rows.push(row); row = []; cur = "";
+        } else cur += c;
+      }
+      if (quoted) throw new Error("CSV 따옴표가 닫히지 않았어요.");
+      if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+      return rows;
+    }
+    function parseQuestions(csv, subjectName) {
+      const rows = parseCSV(csv);
+      let unit = "", invalid = 0, duplicated = 0;
+      const found = [], seen = new Set();
+      rows.forEach(r => {
+        unit = (r[0] || "").trim() || unit;
+        const q = { u: unit, q: (r[1] || "").trim(), a: (r[2] || "").trim().toUpperCase(), e: (r[3] || "").trim(), id: (r[4] || "").trim() };
+        if (!q.q || (q.a !== "O" && q.a !== "X")) {
+          if (r.some(x => String(x).trim()) && q.q && q.a !== "정답" && q.a !== "ANSWER") invalid++;
+          return;
+        }
+        const key = qid(q, subjectName);
+        if (seen.has(key)) { duplicated++; return; }
+        seen.add(key); found.push(q);
+      });
+      return { questions: found, invalid, duplicated };
+    }
+
+    let user = null, questions = [], curSubject = null;
+    let loadingToken = 0, loadingController = null;
+    let syncTimer = null, syncBusy = false, pulling = false;
+    let session = null, curMode = "all";
+    const subjects = () => data().subjects;
+    const subj = () => subjects().find(s => s.name === curSubject) || { name: "샘플", url: "" };
+    function setSyncState(message, kind = "") {
+      const n = $("syncState"); if (!n || storageFailed) return;
+      n.textContent = message;
+      n.dataset.state = kind;
+    }
+    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+    function apiIssue(error) {
+      if (error?.name === "AbortError") return "TIMEOUT";
+      if (error?.code) return error.code;
+      if (error?.name === "TypeError") return "NETWORK_OR_CORS";
+      return "UNKNOWN";
+    }
+    function authErrorText(error) {
+      const code = apiIssue(error);
+      const hints = {
+        TIMEOUT: "Apps Script 응답이 지연됐어요. 잠시 후 다시 시도해 주세요.",
+        NETWORK_OR_CORS: "서버 응답을 읽지 못했어요. 인터넷 연결, 웹앱 공개 권한, 브라우저 CORS 차단 여부를 확인해 주세요.",
+        HTML_RESPONSE: "서버가 JSON 대신 로그인/오류 화면을 보냈어요. Apps Script 배포 주소와 '액세스 권한: 모든 사용자' 설정을 확인해 주세요.",
+        INVALID_JSON: "서버가 올바른 JSON을 반환하지 않았어요. Apps Script 배포 상태를 확인해 주세요.",
+        INVALID_RESPONSE: "서버 응답 형식이 맞지 않아요. Apps Script 코드를 확인해 주세요."
+      };
+      const msg = hints[code] || (code.startsWith("HTTP_") ? `서버 응답 ${code.replace("HTTP_", "HTTP ")} — 웹앱 배포 주소/권한을 확인해 주세요.` : "원인을 확인할 수 없는 통신 오류예요.");
+      const localHint = location.protocol === "file:" ? " 로컬 파일 대신 기존 GitHub Pages(HTTPS) 주소에서 접속해 보세요." : "";
+      return `${msg}${localHint} [${code}]`;
+    }
+    async function api(body) {
+      // 로그인/조회 요청만 자동 재시도. 가입/저장은 중복 실행을 막기 위해 재시도하지 않는다.
+      const canRetry = body.action === "login" || body.action === "load";
+      const maxAttempts = canRetry ? 2 : 1;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), attempt === 1 ? 30000 : 40000);
+        try {
+          // 기존 Apps Script doPost(e) JSON 본문 규격과 동일. 단순 POST라 CORS 사전요청을 피함.
+          const r = await fetch(SYNC_URL, {
+            method: "POST", body: JSON.stringify(body), signal: controller.signal, redirect: "follow"
+          });
+          if (!r.ok) {
+            const err = new Error(`HTTP ${r.status}`);
+            err.code = `HTTP_${r.status}`;
+            throw err;
+          }
+          const text = await r.text();
+          let result;
+          try { result = JSON.parse(text); }
+          catch (_) {
+            const err = new Error("서버가 JSON 아닌 응답 반환");
+            err.code = /<html|<!doctype/i.test(text.slice(0, 500)) ? "HTML_RESPONSE" : "INVALID_JSON";
+            throw err;
+          }
+          if (!result || typeof result !== "object" || Array.isArray(result)) {
+            const err = new Error("서버 응답 구조 오류");
+            err.code = "INVALID_RESPONSE";
+            throw err;
+          }
+          return result;
+        } catch (err) {
+          const code = apiIssue(err);
+          const retriable = ["TIMEOUT", "NETWORK_OR_CORS", "HTTP_404", "HTTP_405", "HTTP_429", "HTTP_500", "HTTP_502", "HTTP_503", "HTTP_504", "HTML_RESPONSE", "INVALID_JSON"].includes(code);
+          if (!canRetry || !retriable || attempt === maxAttempts) throw err;
+          await pause(700);
+        } finally { clearTimeout(timeout); }
+      }
+    }
+    function scheduleSync() {
+      if (!SYNC_URL || !user) { setSyncState("이 기기에 저장됨"); return; }
+      if (syncTimer) clearTimeout(syncTimer);
+      setSyncState("동기화 대기 중", "pending");
+      syncTimer = setTimeout(() => { syncTimer = null; flushSync(); }, 350);
+    }
+    function save(d) {
+      if (!user) return;
+      LS(dataKey(user), cleanData(d));
+      LS(dirtyKey(user), true);
+      scheduleSync();
+    }
+    async function flushSync() {
+      if (!user || !SYNC_URL || syncBusy) return;
+      const owner = user, pw = LS("ox_ph");
+      if (!pw) { setSyncState("재로그인이 필요해요", "error"); return; }
+      if (syncTimer) { clearTimeout(syncTimer); syncTimer = null; }
+      if (LS(dirtyKey(owner)) !== true) { setSyncState("동기화 완료", "ok"); return; }
+      syncBusy = true;
+      try {
+        while (owner === user && LS(dirtyKey(owner)) === true) {
+          const snapshot = dataFor(owner);
+          const signature = JSON.stringify(snapshot);
+          setSyncState("동기화 중…", "pending");
+          const res = await api({ action: "save", id: owner, pw, wrong: snapshot.wrong, subjects: snapshot.subjects, stats: snapshot.stats });
+          if (res.ok !== true) throw new Error(res.msg || "서버 저장 확인 실패");
+          if (JSON.stringify(dataFor(owner)) === signature) {
+            LS(dirtyKey(owner), false);
+            setSyncState("동기화 완료", "ok");
+          }
+          // 저장 중 신규 정답이 생겼다면 최신 데이터로 추가 전송.
+        }
+      } catch (e) {
+        if (owner === user) setSyncState("동기화 실패 · 인터넷 연결 후 재시도", "error");
+        console.warn("OX sync failed:", e);
+      } finally { syncBusy = false; }
+    }
+    async function pull() {
+      if (!SYNC_URL || !user || pulling) return;
+      const owner = user;
+      if (LS(dirtyKey(owner))) {
+        await flushSync();
+        if (LS(dirtyKey(owner))) return; // 로컬에 미전송 기록이 있으면 절대 덮어쓰지 않음.
+      }
+      if (syncBusy || owner !== user) return;
+      pulling = true;
+      const before = JSON.stringify(dataFor(owner));
+      try {
+        const res = await api({ action: "load", id: owner, pw: LS("ox_ph") });
+        if (res.ok !== true) throw new Error(res.msg || "불러오기 실패");
+        if (owner !== user || LS(dirtyKey(owner)) || JSON.stringify(dataFor(owner)) !== before) return;
+        LS(dataKey(owner), cleanData(res));
+        if ($("home") && !$("home").classList.contains("hide")) await reload();
+        setSyncState("동기화 완료", "ok");
+      } catch (e) { console.warn("OX load failed:", e); setSyncState("서버 연결 불안정 · 저장된 자료 사용", "error"); }
+      finally { pulling = false; }
+    }
+    let authBusy = false;
+    async function signup() {
+      if (authBusy) return;
+      const id = $("uid").value.trim(), pw = $("pw").value;
+      if (!id || pw.length < 8) { $("authMsg").textContent = "아이디를 입력하고 비밀번호는 8자 이상으로 설정하세요."; return; }
+      authBusy = true;
+      $("authMsg").textContent = "가입 요청을 확인하는 중…";
+      try {
+        const ph = await hash(pw);
+        if (SYNC_URL) {
+          const r = await api({ action: "signup", id, pw: ph });
+          if (r.ok !== true) { $("authMsg").textContent = r.msg || "가입할 수 없어요."; return; }
+        } else {
+          const users = LS("ox_users") || {};
+          if (users[id]) { $("authMsg").textContent = "이미 있는 아이디예요."; return; }
+          users[id] = ph; LS("ox_users", users);
+        }
+        LS("ox_ph", ph);
+        await enter(id);
+      } catch (e) {
+        console.warn("OX signup error:", apiIssue(e), e);
+        $("authMsg").textContent = "가입 실패: " + authErrorText(e);
+      } finally { authBusy = false; }
+    }
+    async function login() {
+      if (authBusy) return;
+      const id = $("uid").value.trim(), pw = $("pw").value;
+      if (!id || !pw) { $("authMsg").textContent = "아이디와 비밀번호를 입력하세요."; return; }
+      authBusy = true;
+      $("authMsg").textContent = "로그인 확인 중… (연결 문제라면 한 번 자동 재시도해요)";
+      try {
+        const ph = await hash(pw);
+        if (SYNC_URL) {
+          const r = await api({ action: "login", id, pw: ph });
+          if (r.ok !== true) {
+            $("authMsg").textContent = (r.msg || "로그인에 실패했어요.") + (usingLegacyHash ? " 현재 브라우저에서 SHA-256을 사용할 수 없어요. 기존에 HTTPS 환경에서 가입했다면 HTTPS 주소에서 로그인해 주세요." : "");
+            return;
+          }
+          // 이전에 전송되지 않은 풀이 기록을 보호.
+          if (!LS(dirtyKey(id))) LS(dataKey(id), cleanData(r));
+        } else {
+          const users = LS("ox_users") || {};
+          if (!users[id] || users[id] !== ph) { $("authMsg").textContent = "아이디 또는 비밀번호가 틀렸어요."; return; }
+        }
+        LS("ox_ph", ph);
+        await enter(id);
+      } catch (e) {
+        console.warn("OX login error:", apiIssue(e), e);
+        $("authMsg").textContent = "로그인 실패: " + authErrorText(e);
+      } finally { authBusy = false; }
+    }
+    async function enter(id) {
+      user = id;
+      LS("ox_session", id);
+      $("pw").value = ""; $("authMsg").textContent = "";
+      show("home");
+      await reload();
+      renderHome();
+      if (LS(dirtyKey(id))) flushSync();
+      else if (SYNC_URL) pull();
+    }
+    async function logout() {
+      if (LS(dirtyKey(user))) await flushSync();
+      // 저장 실패해도 로컬의 데이터/미전송 플래그는 유지한다.
+      removeLS("ox_session"); removeLS("ox_ph");
+      user = null; curSubject = null; questions = []; session = null;
+      loadingToken++;
+      if (loadingController) loadingController.abort();
+      show("auth");
+    }
+
+    // 과목 드래그 정렬: 포인터 이벤트 기반(마우스/터치 공통). handleSel 요소를 잡고 끌면 순서가 바뀐다.
+    let justDragged = false;
+    function makeSortable(box, horizontal, handleSel) {
+      box.querySelectorAll("[data-name]").forEach(item => {
+        const handle = handleSel ? item.querySelector(handleSel) : item;
+        handle.style.touchAction = horizontal ? "pan-x" : "none";
+        handle.addEventListener("pointerdown", e => {
+          if (e.button > 0) return;
+          const sx = e.clientX, sy = e.clientY; let dragging = false;
+          const move = ev => {
+            if (!dragging) {
+              if (Math.hypot(ev.clientX - sx, ev.clientY - sy) < 8) return;
+              dragging = true; item.classList.add("dragging");
+              try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+            }
+            const sibs = [...box.querySelectorAll("[data-name]")].filter(x => x !== item);
+            for (const s of sibs) {
+              const r = s.getBoundingClientRect();
+              const mid = horizontal ? r.left + r.width / 2 : r.top + r.height / 2;
+              const pos = horizontal ? ev.clientX : ev.clientY;
+              const idx = [...box.children].indexOf(s), me = [...box.children].indexOf(item);
+              if (me < idx && pos > mid) s.after(item);
+              else if (me > idx && pos < mid) s.before(item);
+            }
+          };
+          const end = () => {
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", end);
+            handle.removeEventListener("pointercancel", end);
+            if (!dragging) return;
+            item.classList.remove("dragging");
+            justDragged = true; setTimeout(() => justDragged = false, 0);
+            const order = [...box.querySelectorAll("[data-name]")].map(x => x.dataset.name);
+            const d = data();
+            const sorted = order.map(n => d.subjects.find(s => s.name === n)).filter(Boolean);
+            if (sorted.length === d.subjects.length && sorted.some((s, i) => s !== d.subjects[i])) {
+              d.subjects = sorted; save(d);
+            }
+            renderChips(); renderSubList();
+          };
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", end);
+          handle.addEventListener("pointercancel", end);
+        });
+      });
+    }
+    function renderChips() {
+      const box = $("chips"); box.replaceChildren();
+      const list = subjects();
+      (list.length ? list : [{ name: "샘플" }]).forEach(s => {
+        const n = el("button", "chip" + (s.name === subj().name ? " on" : ""), s.name);
+        n.type = "button";
+        if (list.length) n.dataset.name = s.name;
+        n.onclick = () => { if (justDragged) return; curSubject = s.name; LS("ox_subject_" + user, s.name); reload(); };
+        box.appendChild(n);
+      });
+      const add = el("button", "chip", "＋");
+      add.type = "button"; add.setAttribute("aria-label", "과목 추가 및 관리");
+      add.onclick = openSheet; box.appendChild(add);
+      makeSortable(box, true);
+    }
+    async function reload() {
+      if (!user) return;
+      const names = subjects().map(s => s.name);
+      if (!names.includes(curSubject)) {
+        const last = LS("ox_subject_" + user);
+        curSubject = names.includes(last) ? last : (names[0] || null);
+      }
+      const sub = subj(), owner = user, subjectName = sub.name;
+      const cacheKey = "ox_cache_" + owner + "_" + subjectName;
+      const token = ++loadingToken;
+      if (loadingController) loadingController.abort();
+      loadingController = new AbortController();
+      renderChips();
+      $("loadMsg").textContent = sub.url ? "구글 시트에서 문제를 확인하는 중…" : "＋ 버튼으로 구글 시트를 추가하세요";
+      $("allBtn").disabled = true;
+      $("wrongBtn").disabled = true;
+      if (!sub.url) {
+        questions = [...SAMPLE];
+      } else {
+        try {
+          const url = sub.url + (sub.url.includes("?") ? "&" : "?") + "t=" + Date.now();
+          const r = await fetch(url, { signal: loadingController.signal, cache: "no-store" });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const parsed = parseQuestions(await r.text(), subjectName);
+          if (!parsed.questions.length) throw new Error("유효한 O/X 문제를 찾지 못했어요");
+          if (owner !== user || subjectName !== subj().name || token !== loadingToken) return;
+          questions = parsed.questions;
+          LS(cacheKey, questions);
+          $("loadMsg").textContent = (parsed.invalid || parsed.duplicated)
+            ? `불러오기 완료 · 형식 오류 ${parsed.invalid}개, 중복 ${parsed.duplicated}개 제외`
+            : `${questions.length}문제 최신화 완료`;
+        } catch (e) {
+          if (owner !== user || token !== loadingToken || e.name === "AbortError") return;
+          const cached = LS(cacheKey);
+          questions = Array.isArray(cached) ? cached : [];
+          $("loadMsg").textContent = questions.length
+            ? "연결 오류 · 마지막 저장된 문제로 학습할 수 있어요"
+            : "문제를 불러오지 못했어요 · 시트 공개/CSV 주소를 확인하세요";
+          console.warn("OX CSV load failed:", e);
+        }
+      }
+      if (owner === user && token === loadingToken) {
+        migrateStableIds(questions, subjectName);
+        renderHome();
+      }
+    }
+    function wrongList() {
+      const w = data().wrong;
+      return questions.filter(q => !!noteOf(w[qid(q)]));
+    }
+    function renderHome() {
+      if (!user) return;
+      $("who").textContent = user + "님";
+      const w = data().wrong;
+      let incorrect = 0, uncertain = 0;
+      questions.forEach(q => {
+        const note = noteOf(w[qid(q)]);
+        if (note?.kind === "wrong") incorrect++;
+        if (note?.kind === "unsure") uncertain++;
+      });
+      $("nAll").textContent = questions.length;
+      $("nWrong").textContent = incorrect;
+      $("nUnsure").textContent = uncertain;
+      $("wrongBtn").textContent = `집중 복습 (${incorrect + uncertain})`;
+      $("wrongBtn").disabled = incorrect + uncertain === 0;
+      $("allBtn").disabled = questions.length === 0;
+      const active = LS(activeKey(user));
+      const resumable = active && active.version === 2 && active.phase !== "done";
+      $("resumeBtn").classList.toggle("hide", !resumable);
+      if (resumable) $("resumeBtn").textContent = `이어서 풀기 · ${active.subject}`;
+      if (!SYNC_URL) setSyncState("이 기기에만 저장됨");
+    }
+    function goHome() { show("home"); renderChips(); renderHome(); }
+
+    function openSheet() { renderSubList(); $("sheet").classList.remove("hide"); }
+    function closeSheet() { $("sheet").classList.add("hide"); }
+    function renderSubList() {
+      const box = $("subList"); box.replaceChildren();
+      subjects().forEach(s => {
+        const line = el("div", "item");
+        line.dataset.name = s.name;
+        line.appendChild(el("span", "grip", "⠿ " + s.name));
+        const button = el("button", "", "삭제");
+        button.type = "button"; button.onclick = () => delSubject(s.name);
+        line.appendChild(button); box.appendChild(line);
+      });
+      makeSortable(box, false, ".grip");
+    }
+    function addSubject() {
+      const name = $("subName").value.trim(), url = $("subUrl").value.trim(), d = data();
+      if (!name || !/^https:\/\//i.test(url)) return alert("과목 이름과 HTTPS로 시작하는 CSV 주소를 입력하세요.");
+      if (d.subjects.some(s => s.name === name)) return alert("이미 등록된 과목 이름이에요.");
+      d.subjects.push({ name, url }); save(d);
+      $("subName").value = $("subUrl").value = "";
+      curSubject = name; LS("ox_subject_" + user, name);
+      closeSheet(); reload();
+    }
+    function delSubject(name) {
+      if (!confirm(`"${name}" 과목과 해당 과목의 저장된 기록을 삭제할까요?`)) return;
+      const d = data(), key = "ox_cache_" + user + "_" + name;
+      const cached = LS(key) || [];
+      cached.forEach(q => { delete d.wrong[qid(q, name)]; delete d.stats[qid(q, name)]; });
+      // CSV 캐시에 없는 문제도 E열 고유ID라면 안전하게 제거 가능.
+      const prefix = "id:" + encodeURIComponent(name) + ":";
+      Object.keys(d.wrong).forEach(id => { if (id.startsWith(prefix)) delete d.wrong[id]; });
+      Object.keys(d.stats).forEach(id => { if (id.startsWith(prefix)) delete d.stats[id]; });
+      d.subjects = d.subjects.filter(s => s.name !== name);
+      removeLS(key);
+      const active = LS(activeKey(user));
+      if (active?.subject === name) { removeLS(activeKey(user)); session = null; }
+      save(d); renderSubList();
+      if (curSubject === name) curSubject = null;
+      reload();
+    }
+
+    const shuffle = array => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    };
+    function weight(q, d) {
+      const id = qid(q), st = d.stats[id];
+      if (noteOf(d.wrong[id])) return 2;
+      if (!st || !Number.isFinite(st.c) || st.c < 3) return 1;
+      const elapsed = Math.max(0, Date.now() - (Number(st.t) || 0));
+      const ratio = elapsed / DAY / (GAP[st.c] || 30);
+      return ratio < 1 ? Math.max(0.03, 0.03 + 0.97 * ratio * ratio) : 1 + Math.min(ratio - 1, 1);
+    }
+    function weightedPick(list, count) {
+      const d = data();
+      return list.map(q => ({ q, k: Math.pow(Math.random(), 1 / weight(q, d)) }))
+        .sort((a, b) => b.k - a.k).slice(0, count).map(x => x.q);
+    }
+    function pick(mode) {
+      curMode = mode;
+      $("countTitle").textContent = mode === "wrong" ? "집중 복습 · 문제 수 선택" : "전체 학습 · 문제 수 선택";
+      const total = mode === "wrong" ? wrongList().length : questions.length;
+      document.querySelectorAll("#countSheet [data-count]").forEach(b => {
+        b.disabled = total === 0;
+        b.querySelector("small").textContent = total < Number(b.dataset.count) ? `실제 ${total}문제` : "문제";
+      });
+      $("countSheet").classList.remove("hide");
+    }
+    function closeCount() { $("countSheet").classList.add("hide"); }
+    function saveSession() {
+      if (user && session) LS(activeKey(user), session);
+    }
+    function start(n) {
+      closeCount();
+      const pool = curMode === "wrong" ? shuffle([...wrongList()]) : weightedPick(questions, n);
+      if (!pool.length) return;
+      const active = LS(activeKey(user));
+      if (active?.phase !== "done" && active?.version === 2 && !confirm("진행 중인 학습을 새 학습으로 바꿀까요?")) return;
+      session = {
+        version: 2, subject: subj().name, mode: curMode,
+        phase: "main", mainQueue: pool.slice(0, n), reviewQueue: [],
+        index: 0, answered: false, unsure: false, feedback: null,
+        reviewIds: [],
+        results: { mainCorrect: 0, mainUnsure: 0, mainWrong: 0, reviewCorrect: 0, reviewUnsure: 0, reviewWrong: 0, graduated: 0 }
+      };
+      saveSession(); show("quiz"); render();
+    }
+    function resumeQuiz() {
+      const active = LS(activeKey(user));
+      if (!active || active.version !== 2) return;
+      session = active;
+      if (session.phase === "done") return showSummary();
+      if (!Array.isArray(session.mainQueue) || !session.mainQueue.length) return;
+      curSubject = session.subject;
+      LS("ox_subject_" + user, curSubject);
+      show("quiz"); render();
+    }
+    function queue() { return session.phase === "review" ? session.reviewQueue : session.mainQueue; }
+    function toggleUnsure() {
+      if (!session || session.answered) return;
+      session.unsure = !session.unsure;
+      $("unsureBtn").classList.toggle("selected", session.unsure);
+      $("unsureBtn").setAttribute("aria-pressed", String(session.unsure));
+      saveSession();
+    }
+    function renderFeedback() {
+      const f = session.feedback;
+      if (!f) return;
+      const b = $("resBox"); b.className = "result " + (f.correct ? "ok" : "no"); b.replaceChildren();
+      b.appendChild(el("h3", "", f.correct ? (f.unsure ? "정답 · 아리까리로 저장" : "정답!") : `오답 · 정답은 ${f.answer}`));
+      if (f.explanation) b.appendChild(el("p", "", f.explanation));
+      if (f.note) b.appendChild(el("p", "m", f.note));
+      const last = session.index === queue().length - 1;
+      $("nextBtn").textContent = !last ? "다음 문제" : session.phase === "main" && session.reviewIds.length
+        ? `틀림·아리까리 ${session.reviewIds.length}문제 재도전` : "학습 결과 보기";
+      $("ans").classList.add("hide"); $("unsureBtn").classList.add("hide");
+      $("result").classList.remove("hide");
+    }
+    function render() {
+      const list = queue();
+      if (!list || !list.length || session.index >= list.length) { finish(); return; }
+      const q = list[session.index];
+      $("qtext").textContent = q.q;
+      $("tag").textContent = q.u || "";
+      $("tag").classList.toggle("hide", !q.u);
+      $("phaseLabel").textContent = session.phase === "review" ? "마지막 재도전" : "1차 학습";
+      $("phaseLabel").classList.toggle("review", session.phase === "review");
+      $("prog").textContent = `${session.index + 1} / ${list.length}`;
+      $("barFill").style.width = `${Math.round(session.index / list.length * 100)}%`;
+      $("unsureBtn").classList.toggle("selected", !!session.unsure);
+      $("unsureBtn").setAttribute("aria-pressed", String(!!session.unsure));
+      $("unsureBtn").classList.toggle("hide", !!session.answered);
+      $("ans").classList.toggle("hide", !!session.answered);
+      $("result").classList.toggle("hide", !session.answered);
+      if (session.answered) renderFeedback();
+    }
+    function answer(choice) {
+      if (!session || session.phase === "done" || session.answered) return;
+      const q = queue()[session.index];
+      if (!q) return;
+      session.answered = true; // 더블 클릭 방지 및 새로고침 시 중복 집계 방지
+      const id = qid(q, session.subject);
+      const correct = choice === q.a, unsure = !!session.unsure;
+      const d = data(), oldNote = noteOf(d.wrong[id]);
+      const transition = updateNote(oldNote, correct, unsure);
+      if (transition.note) d.wrong[id] = transition.note;
+      else delete d.wrong[id];
+      const st = d.stats[id] && typeof d.stats[id] === "object" ? d.stats[id] : { c: 0, t: 0 };
+      st.c = correct && !unsure ? (Math.max(0, Number(st.c) || 0) + 1) : 0;
+      st.t = Date.now();
+      st.correct = (Number(st.correct) || 0) + (correct ? 1 : 0);
+      st.incorrect = (Number(st.incorrect) || 0) + (correct ? 0 : 1);
+      st.uncertain = (Number(st.uncertain) || 0) + (correct && unsure ? 1 : 0);
+      d.stats[id] = st;
+      let hint = "";
+      if (transition.graduated) { hint = "집중 복습 노트에서 졸업!"; session.results.graduated++; }
+      else if (transition.note) hint = `${noteText(transition.note)} · ${!correct ? "다음에 다시 확인해요" : unsure ? "확신이 생길 때까지 복습해요" : "한 번 더 정확히 맞혀보세요"}`;
+      else hint = "확실하게 기억했어요";
+      if (session.phase === "main") {
+        if (!correct) session.results.mainWrong++;
+        else if (unsure) session.results.mainUnsure++;
+        else session.results.mainCorrect++;
+        if (!correct || unsure) {
+          if (!session.reviewIds.includes(id)) session.reviewIds.push(id);
+        }
+      } else {
+        if (!correct) session.results.reviewWrong++;
+        else if (unsure) session.results.reviewUnsure++;
+        else session.results.reviewCorrect++;
+      }
+      session.feedback = { correct, unsure, answer: q.a, explanation: q.e || "", note: hint };
+      // 로컬 문제별 기록과 진행 상태를 먼저 저장한 후 서버는 순차 동기화.
+      save(d); saveSession();
+      renderFeedback();
+      if (navigator.vibrate) navigator.vibrate(correct ? 15 : [40, 30, 40]);
+    }
+    function next() {
+      if (!session || !session.answered) return;
+      const list = queue();
+      if (session.index + 1 < list.length) {
+        session.index++; session.answered = false; session.unsure = false; session.feedback = null;
+        saveSession(); render(); return;
+      }
+      if (session.phase === "main" && session.reviewIds.length) {
+        const target = new Set(session.reviewIds);
+        session.reviewQueue = shuffle(session.mainQueue.filter(q => target.has(qid(q, session.subject))));
+        session.phase = "review"; session.index = 0;
+        session.answered = false; session.unsure = false; session.feedback = null;
+        saveSession(); render(); return;
+      }
+      finish();
+    }
+    function finish() {
+      if (!session) return;
+      session.phase = "done"; session.answered = true;
+      saveSession(); showSummary();
+    }
+    function showSummary() {
+      if (!session) return goHome();
+      const r = session.results;
+      const checked = session.mainQueue.length;
+      const reviewCount = session.reviewQueue.length;
+      $("summaryTitle").textContent = "학습을 완료했어요!";
+      $("summaryDesc").textContent = `${session.subject} · 최초 ${checked}문제, 재도전 ${reviewCount}문제`;
+      $("summaryMain").textContent = `${r.mainCorrect + r.mainUnsure} / ${checked}`;
+      $("summaryReview").textContent = reviewCount ? `${r.reviewCorrect + r.reviewUnsure} / ${reviewCount}` : "—";
+      $("summaryGraduated").textContent = r.graduated;
+      const remaining = session.mainQueue.filter(q => noteOf(data().wrong[qid(q, session.subject)])).length;
+      $("summaryRemaining").textContent = `${remaining}문제는 집중 복습 노트에 남아 있어요.`;
+      show("summary");
+    }
+    function summaryHome() {
+      if (user) removeLS(activeKey(user));
+      session = null; goHome();
+    }
+    document.addEventListener("keydown", e => {
+      if ($("quiz").classList.contains("hide")) return;
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      const key = e.key.toLowerCase();
+      if (!session.answered) {
+        if (key === "a") { e.preventDefault(); toggleUnsure(); }
+        else if (key === "o" || key === "arrowleft") { e.preventDefault(); answer("O"); }
+        else if (key === "x" || key === "arrowright") { e.preventDefault(); answer("X"); }
+      } else if (["enter", " ", "arrowright"].includes(key)) { e.preventDefault(); next(); }
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden || !user) return;
+      if (LS(dirtyKey(user))) flushSync();
+      else if (!$("home").classList.contains("hide")) pull();
+      if (!$("home").classList.contains("hide")) reload();
+    });
+    window.addEventListener("online", () => { if (user && LS(dirtyKey(user))) flushSync(); });
+    window.addEventListener("storage", e => {
+      if (!user) return;
+      if (e.key === dataKey(user) && !$("home").classList.contains("hide")) renderHome();
+    });
+    (async function boot() {
+      const s = LS("ox_session");
+      const valid = SYNC_URL ? LS("ox_ph") : (LS("ox_users") || {})[s];
+      if (s && valid) await enter(s);
+      else show("auth");
+    })();
+  </script>
+</body>
+
+</html>
