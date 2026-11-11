@@ -1478,18 +1478,45 @@
       if(has(patch,'subjects')) out.subjects=clone(patch.subjects);
       return out;
     }
+    // Conflicting question states use the newest answer timestamp as a complete pair.
+    function mergeSubjects(base,local,remote,preferLocal) {
+      const maps=[base,local,remote].map(list=>new Map(list.map(s=>[s.name,s])));
+      const chosen=new Map();
+      for(const name of new Set([...maps[0].keys(),...maps[1].keys(),...maps[2].keys()])) {
+        const [old,l,r]=maps.map(m=>m.get(name));
+        const next=equal(l,old) ? r : equal(r,old) || equal(l,r) ? l : preferLocal ? l : r;
+        if(next!==undefined) chosen.set(name,next);
+      }
+      const order=preferLocal ? [...local,...remote] : [...remote,...local];
+      const result=[];
+      for(const item of order) if(chosen.has(item.name)) {result.push(clone(chosen.get(item.name)));chosen.delete(item.name);}
+      return result;
+    }
     function rebase(base,local,remote) {
-      const patch=changesBetween(base,local), conflicts=[];
+      const patch=changesBetween(base,local),out=applyPatch(remote,patch);
+      let resolved=0;
       for(const k of new Set([...Object.keys(patch.stats||{}),...Object.keys(patch.wrong||{})])) {
         const pair=d=>({stats:d.stats[k],wrong:d.wrong[k]});
-        if(!equal(pair(remote),pair(base)) && !equal(pair(remote),pair(local))) conflicts.push('question:'+k);
+        if(!equal(pair(remote),pair(base)) && !equal(pair(remote),pair(local))) {
+          // Newer answer wins, regardless of coverage/counts; exact ties favor the server.
+          const lt=positiveCount(local.stats[k]?.t),rt=positiveCount(remote.stats[k]?.t);
+          const winner=lt>rt ? local : remote;
+          for(const field of ['stats','wrong']) {
+            if(has(winner[field],k)) out[field][k]=clone(winner[field][k]);
+            else delete out[field][k];
+          }
+          resolved++;
+        }
       }
-      if(has(patch,'subjects') && !equal(remote.subjects,base.subjects) && !equal(remote.subjects,local.subjects)) conflicts.push('subjects');
-      return {data:applyPatch(remote,patch),conflicts};
+      if(has(patch,'subjects')) {
+        const preferLocal=equal(remote.subjects,base.subjects) && !equal(local.subjects,base.subjects);
+        out.subjects=mergeSubjects(base.subjects,local.subjects,remote.subjects,preferLocal);
+      }
+      return {data:out,conflicts:[],resolved};
     }
     function canWrite() {
       if(syncReady && tabWritable && !syncBlocked && !storageFailed) return true;
-      setSyncState(syncBlocked ? '기록 충돌 · 양쪽 기록 보존됨 · 학습 중지' : '기록 확인 중이거나 다른 탭이 열려 있어요. 학습을 잠시 멈췄어요.', 'error');
+      setSyncState('기록 확인 중이거나 다른 탭이 열려 있어요. 학습을 잠시 멈췄어요.', 'error');
       return false;
     }
     async function acquireWriter(id) {
@@ -1517,9 +1544,12 @@
       try {
         for(let count=0;count<8 && owner===user;count++) {
           let e=envelope(owner);if(!e) return;
+          // Resume envelopes paused by the previous release. Recheck against the live server.
+          if(e.conflict) {delete e.conflict;e.inflight=null;putEnvelope(owner,e);}
+          syncBlocked=false;
           if(!e.inflight) {
             const patch=changesBetween(e.base,e.data);
-            if(!Object.keys(patch).length) {LS(dirtyKey(owner),false);syncBlocked=false;setSyncState('동기화 완료','ok');return;}
+            if(!Object.keys(patch).length) {LS(dirtyKey(owner),false);syncBlocked=false;setSyncState('동기화 완료','ok');if(!$('home').classList.contains('hide')) renderHome();return;}
             if(syncBlocked) return;
             const requestId=crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+'_'+Math.random().toString(36).slice(2);
             e.inflight={requestId,revision:e.revision,changes:patch,snapshot:clone(e.data)};
@@ -1532,11 +1562,6 @@
           if(!validState(r) || (!r.ok && r.code!=='CONFLICT')) throw new Error(r.msg || '서버 응답 형식 오류 · 서버 코드 배포를 확인해 주세요.');
           e=envelope(owner);const remote=cleanData(r);
           const result=rebase(r.ok ? sent.snapshot : e.base,e.data,remote);
-          if(result.conflicts.length) {
-            e.inflight=null;e.conflict={remote,revision:r.revision,keys:result.conflicts,at:Date.now()};
-            putEnvelope(owner,e);syncBlocked=true;
-            setSyncState('동일 문제의 기록 충돌 · 양쪽 기록 보존됨 · 학습 중지','error');renderHome();return;
-          }
           putEnvelope(owner,{base:remote,data:result.data,revision:r.revision,inflight:null});
           syncBlocked=false;
         }
@@ -1548,9 +1573,9 @@
       if(!SYNC_URL || !user || pulling || syncBusy || !tabWritable || storageFailed) return;
       const owner=user;
       let e=envelope(owner);
-      if(e && (e.inflight || !equal(e.base,e.data))) {
+      if(e && (e.conflict || e.inflight || !equal(e.base,e.data))) {
         syncReady=true;
-        if(e.conflict) {syncBlocked=true;setSyncState('기록 충돌 · 양쪽 기록 보존됨 · 학습 중지','error');return;}
+        syncBlocked=false;
         await flushSync();if(owner!==user || LS(dirtyKey(owner))) return;
       }
       pulling=true;
@@ -1561,10 +1586,6 @@
         e=envelope(owner);
         // A local answer might have happened while load was in progress. Preserve it by three-way comparison.
         const remote=cleanData(r),result=e ? rebase(e.base,e.data,remote) : {data:remote,conflicts:[]};
-        if(result.conflicts.length) {
-          e.conflict={remote,revision:r.revision,keys:result.conflicts,at:Date.now()};putEnvelope(owner,e);syncBlocked=true;
-          throw new Error('동일 문제의 기록 충돌 · 양쪽 기록을 보존했어요.');
-        }
         // Unknown old dirty data is quarantined, NEVER uploaded as an authoritative snapshot.
         if(!e && LS(dataKey(owner)) && !LS(legacyBackupKey(owner))) {
           if(!LS(legacyBackupKey(owner),{data:LS(dataKey(owner)),dirty:LS(dirtyKey(owner)),at:Date.now()})) throw new Error('이전 기록 백업 실패');
