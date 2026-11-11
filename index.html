@@ -1068,11 +1068,7 @@
       </div>
       <div class="note" id="loadMsg" role="status"></div>
       <div class="note sync" id="syncState" role="status" aria-live="polite"></div>
-        <div class="row" style="margin-top:8px;flex-wrap:wrap;justify-content:center">
-          <button class="borrow-trigger" onclick="downloadRecovery()">기기 기록 백업</button>
-          <button class="borrow-trigger" onclick="pull()">동기화 재시도</button>
-          <button class="borrow-trigger" onclick="useServerCopy()">서버 기록 사용</button>
-        </div>
+
     </div>
 
     <!-- 퀴즈 -->
@@ -1493,7 +1489,7 @@
     }
     function canWrite() {
       if(syncReady && tabWritable && !syncBlocked && !storageFailed) return true;
-      setSyncState(syncBlocked ? '기록 충돌 · 백업 후 동기화 상태를 확인해 주세요' : '기록 확인 중이거나 다른 탭이 열려 있어요. 학습을 잠시 멈췄어요.', 'error');
+      setSyncState(syncBlocked ? '기록 충돌 · 양쪽 기록 보존됨 · 학습 중지' : '기록 확인 중이거나 다른 탭이 열려 있어요. 학습을 잠시 멈췄어요.', 'error');
       return false;
     }
     async function acquireWriter(id) {
@@ -1507,31 +1503,6 @@
           await new Promise(release => {releaseWriter=release;resolve();});
         }).catch(() => {tabWritable=false;resolve();});
       });
-    }
-    function downloadRecovery() {
-      if(!user) return;
-      const content={format:'ox-local-recovery-v3',account:user,exportedAt:new Date().toISOString(),
-        envelope:envelope(user),legacy:LS(legacyBackupKey(user)) || LS(dataKey(user))};
-      const url=URL.createObjectURL(new Blob([JSON.stringify(content,null,2)],{type:'application/json'}));
-      const a=document.createElement('a');a.href=url;a.download='ox_local_backup_'+Date.now()+'.json';a.click();
-      setTimeout(()=>URL.revokeObjectURL(url),10000);
-    }
-    async function useServerCopy() {
-      if(!user || !tabWritable || syncBusy || pulling) return;
-      if(!confirm('현재 기기 기록을 백업 파일로 내려받은 뒤 서버 기록을 사용할까요? 미전송 풀이는 서버에 반영되지 않습니다. 내려받은 백업 파일은 보관해 주세요.')) return;
-      downloadRecovery();
-      const owner=user,wasReady=syncReady;
-      pulling=true;syncReady=false;renderHome();
-      try {
-        const r=await api({action:'load',id:owner,pw:LS('ox_ph')});
-        if(owner!==user || !r.ok || !validState(r)) throw new Error(r.msg || '서버 기록 확인 실패');
-        const old=envelope(owner);
-        if(!LS('ox_before_server_reset_'+owner+'_'+Date.now(),old)) throw new Error('기기 백업 저장 실패');
-        putEnvelope(owner,{base:cleanData(r),data:cleanData(r),revision:r.revision,inflight:null});
-        removeLS(activeKey(owner));session=null;syncBlocked=false;syncReady=true;
-        await reload();setSyncState('서버 기록을 불러왔어요. 기기 백업 파일도 보관해 주세요.','ok');
-      } catch(e) {syncReady=wasReady;setSyncState(e.message,'error');}
-      finally {pulling=false;renderHome();}
     }
     function save(d) {
       if(!user || !canWrite()) throw new Error('안전한 저장이 준비되지 않았습니다.');
@@ -1564,7 +1535,7 @@
           if(result.conflicts.length) {
             e.inflight=null;e.conflict={remote,revision:r.revision,keys:result.conflicts,at:Date.now()};
             putEnvelope(owner,e);syncBlocked=true;
-            setSyncState('동일 문제의 기록 충돌 · 양쪽 기록 보존됨 · 기기 기록 백업 후 확인해 주세요','error');renderHome();return;
+            setSyncState('동일 문제의 기록 충돌 · 양쪽 기록 보존됨 · 학습 중지','error');renderHome();return;
           }
           putEnvelope(owner,{base:remote,data:result.data,revision:r.revision,inflight:null});
           syncBlocked=false;
@@ -1579,7 +1550,7 @@
       let e=envelope(owner);
       if(e && (e.inflight || !equal(e.base,e.data))) {
         syncReady=true;
-        if(e.conflict) {syncBlocked=true;setSyncState('기록 충돌 · 기기 기록 백업 후 확인해 주세요','error');return;}
+        if(e.conflict) {syncBlocked=true;setSyncState('기록 충돌 · 양쪽 기록 보존됨 · 학습 중지','error');return;}
         await flushSync();if(owner!==user || LS(dirtyKey(owner))) return;
       }
       pulling=true;
@@ -1603,7 +1574,7 @@
         if(!e) {removeLS(activeKey(owner));session=null;}
         if(!$('home').classList.contains('hide')) await reload();
         if(LS(dirtyKey(owner))) scheduleSync();
-        else setSyncState(LS(legacyBackupKey(owner))?.dirty ? '동기화 완료 · 구버전 미전송 기록은 별도 보존됨 (기기 기록 백업)' : '동기화 완료','ok');
+        else setSyncState(LS(legacyBackupKey(owner))?.dirty ? '동기화 완료 · 구버전 미전송 기록은 별도 보존됨' : '동기화 완료','ok');
       } catch(e) {setSyncState(e.message || '서버 연결 실패 · 기기 기록 유지','error');}
       finally {pulling=false;}
     }
